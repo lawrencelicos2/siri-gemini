@@ -1,0 +1,40 @@
+name: Build and publish
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: Randomblock1/theos-action@v1
+      - run: |
+          make package FINALPACKAGE=1
+          make clean
+          THEOS_PACKAGE_SCHEME=rootless make package FINALPACKAGE=1
+      - name: Make Sileo repo
+        run: |
+          mkdir -p site/debs
+          cp packages/*.deb site/debs/
+          cd site
+          dpkg-scanpackages -m debs /dev/null > Packages
+          bzip2 -fk Packages
+          gzip -fk Packages
+          printf 'Origin: SiriGemini Repo\nLabel: SiriGemini Repo\nSuite: stable\nVersion: 1.0\nCodename: ios\nArchitectures: iphoneos-arm iphoneos-arm64\nComponents: main\nDescription: SiriGemini\n' > Release
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.d.outputs.page_url }}
+    steps:
+      - id: d
+        uses: actions/deploy-pages@v4
