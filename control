@@ -1,9 +1,0 @@
-Package: com.sirigemini.tweak
-Name: SiriGemini
-Version: 1.0.0
-Architecture: iphoneos-arm
-Description: Routes Siri requests to Google Gemini with a follow-up chat window
-Maintainer: SiriGemini
-Author: SiriGemini
-Section: Tweaks
-Depends: mobilesubstrate, preferenceloader, firmware (>= 16.0)
